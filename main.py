@@ -15,7 +15,7 @@ def open_program(program_name):
     list(Path(os.path.join('C:\\Users', getuser(), 'AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs')).rglob('*'))
     ]
     for p in paths:
-        f = [path for path in p if program_name.lower() in path.name.lower() and 'uninstall' not in path.name.lower() and 'lnk' in path.name.split('.')[-1]]
+        f = [path for path in p if program_name.lower() in path.name.lower() and 'uninstall' not in path.name.lower() and ('lnk' in path.name.split('.')[-1] or 'exe' in path.name.split('.')[-1])]
         founded.extend(f)
 
     if len(founded) > 1:
@@ -111,7 +111,7 @@ def get_open_type(doc):
     if '.' not in doc:
         return 'program'
     else:
-        if doc.split('.')[-1] in ['doc', 'docx', 'txt', 'pdf', 'ppt', 'pptx', 'xls', 'xlsx', 'csv', 'json', 'xml', 'sln', 'html', 'css', 'py', 'cpp', 'c', 'js', 'java', 'php', 'sql', 'cs']:
+        if doc.split('.')[-1] in ['doc', 'docx', 'txt', 'pdf', 'ppt', 'pptx', 'xls', 'xlsx', 'csv', 'json', 'xml', 'sln', 'html', 'css', 'py', 'cpp', 'c', 'js', 'java', 'php', 'sql', 'cs', 'jpg', 'png', 'psd', 'jpeg', 'gif', 'webp']:
             return 'document'
         else:
             return 'website'
@@ -124,46 +124,34 @@ def __main__():
     while True:
         doc = nlp(input('Enter your command / help / exit: '))
         
-        # print("""POS TAGGING""")
-        # for token in doc:
-        #     print((token.text, token.pos_), end=' ')
-        # print()
         if doc[0].text == 'help':
             print('open <program_name> - open program \nclose <program_name> - close program\nopen <website_url> - open website\nopen <document_name> - open document\n')
         elif doc[0].text == 'open':
-            desired_function = get_open_type(str(doc[1].text))
+            target = ' '.join([d.text for d in doc[1:]])
+            print(target)
+            desired_function = get_open_type(str(target))
             if(desired_function == 'program'):
-                if open_program(doc[1].text):
+                if open_program(target):
                     print('Program opened successfully')
                 else:
                     print('Program not found')
             elif(desired_function == 'website'):
-                if open_website(doc[1].text):
+                if open_website(target):
                     print('Website opened successfully')
                 else:
                     print('Website not found')
             elif(desired_function == 'document'):
-                if open_document(doc[1].text):
+                if open_document(target):
                     print('Document opened successfully')
                 else:
                     print('Document not found')
         elif(doc[0].text == 'close'):
-            if close_program(doc[1].text):
+            if close_program(target):
                 print('Program(s) closed successfully')
-        # if doc[0].tag_ != 'VB':
-        #     print('Error! Not a command!')
-        #     continue
-        # else:
-        #     print('Great! It\'s a command')
-        #     if doc[1].pos_ == 'ADP':
-        #         print("action: ", doc[0].text, doc[1].text)
-        #         doc = doc[2:]
-        #     else:
-        #         print("action: ", doc[0].text)
-        #         doc = doc[1:]
-        #     print('object: ', end="")
-        #     for token in doc:
-        #         print(token.text, end=' ')
+        elif(doc[0].text == 'exit'):
+            exit()
+        else:
+            print('No such command')
         print()
 
 if __name__ == '__main__':
